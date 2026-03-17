@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Padtec Signal Collector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f2a68d;
+            --secondary: #2c3e50;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            font-weight: 600;
+            letter-spacing: -1px;
+            margin: 0;
+            background: linear-gradient(to right, #f2a68d, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 400;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 0 0 4px rgba(242, 166, 141, 0.1);
+        }
+
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, #f2a68d, #ea580c);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(234, 88, 12, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(234, 88, 12, 0.4);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(242,166,141,0.3);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 16px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.05);
+            display: none;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .signal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .signal-card {
+            background: var(--glass);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .signal-card h4 { margin: 0 0 0.5rem 0; color: var(--primary); }
+        .val { font-size: 1.2rem; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="logo">
+                <h1>TM800 Collector</h1>
+                <p style="color: #f2a68d; font-size: 0.8rem; margin-top: 5px; font-weight: bold;">v2.1 - Super Estabilidade</p>
+                <p style="color: #64748b; font-size: 0.9rem;">Padtec Signal Monitor</p>
+            </div>
+            
+            <form id="collectForm">
+                <div class="form-group">
+                    <label>IP do Servidor (ex: 10.144.198.10)</label>
+                    <input type="text" id="url" value="10.144.198.10" required>
+                </div>
+                <div class="form-group">
+                    <label>Usuário</label>
+                    <input type="text" id="user" value="admin" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="pass" value="admin" required>
+                </div>
+                
+                <button type="submit" id="btnText">Iniciar Coleta</button>
+            </form>
+
+            <div class="loading" id="loader">
+                <span class="spinner"></span>
+                <span id="loadText">Acessando equipamento...</span>
+            </div>
+
+            <div id="result">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; font-size: 1rem;">Resultado da Coleta</h3>
+                    <span id="time" style="font-size: 0.8rem; color: #64748b;"></span>
+                </div>
+                <p id="eqName" style="margin: 5px 0 15px 0; font-weight: 600; color: #94a3b8;"></p>
+                
+                <div class="signal-grid">
+                    <div class="signal-card">
+                        <h4>LINE 1</h4>
+                        <div style="font-size: 0.8rem; color: #64748b;">Pin / Pout</div>
+                        <div class="val"><span id="l1_pin">--</span> / <span id="l1_pout">--</span></div>
+                    </div>
+                    <div class="signal-card">
+                        <h4>LINE 2</h4>
+                        <div style="font-size: 0.8rem; color: #64748b;">Pin / Pout</div>
+                        <div class="val"><span id="l2_pin">--</span> / <span id="l2_pout">--</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="console" style="margin-top: 2rem; padding: 1rem; background: #000; border-radius: 12px; font-family: monospace; font-size: 0.8rem; color: #10b981; border: 1px solid #1e293b; max-height: 150px; overflow-y: auto; display:none;">
+                <div style="color: #64748b; margin-bottom: 5px;">> Console de Depuração</div>
+                <div id="consoleText"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log("Padtec Monitor: Script carregado com sucesso.");
+        
+        function addLog(msg) {
+            console.log("LOG:", msg);
+            const consoleDiv = document.getElementById('console');
+            const consoleText = document.getElementById('consoleText');
+            if (consoleDiv) consoleDiv.style.display = 'block';
+            if (consoleText) {
+                const entry = document.createElement('div');
+                entry.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+                consoleText.appendChild(entry);
+                consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            }
+        }
+
+        document.getElementById('collectForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            console.log("Padtec Monitor: Formulário enviado.");
+            
+            const btn = document.getElementById('btnText');
+            const loader = document.getElementById('loader');
+            const resultDiv = document.getElementById('result');
+            const consoleText = document.getElementById('consoleText');
+            
+            if (consoleText) consoleText.innerHTML = '';
+            if (btn) btn.style.display = 'none';
+            if (loader) loader.style.display = 'block';
+            if (resultDiv) resultDiv.style.display = 'none';
+
+            addLog("Iniciando processo de coleta...");
+
+            const data = {
+                url: document.getElementById('url').value,
+                user: document.getElementById('user').value,
+                pass: document.getElementById('pass').value
+            };
+
+            try {
+                addLog(`Conectando ao servidor local em ${window.location.host}...`);
+                const response = await fetch(`/collect?t=${Date.now()}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const res = await response.json();
+                console.log("Padtec Monitor: Resposta recebida", res);
+                
+                if (res.status === 'success') {
+                    addLog("Coleta realizada com sucesso!");
+                    document.getElementById('l1_pin').innerText = res.lines['LINE 1'].Pin;
+                    document.getElementById('l1_pout').innerText = res.lines['LINE 1'].Pout;
+                    document.getElementById('l2_pin').innerText = res.lines['LINE 2'].Pin;
+                    document.getElementById('l2_pout').innerText = res.lines['LINE 2'].Pout;
+                    document.getElementById('eqName').innerText = res.equipment;
+                    document.getElementById('time').innerText = new Date().toLocaleTimeString();
+                    if (resultDiv) resultDiv.style.display = 'block';
+                } else {
+                    addLog("ERRO NO BACKEND: " + res.message);
+                    alert('O equipamento retornou um erro. Veja o console abaixo.');
+                }
+            } catch (err) {
+                console.error("Padtec Monitor: Erro de comunicação", err);
+                addLog("FALHA DE COMUNICAÇÃO: " + err.message);
+                alert('Não foi possível falar com o servidor local. Tente atualizar a página (F5).');
+            } finally {
+                if (btn) btn.style.display = 'block';
+                if (loader) loader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

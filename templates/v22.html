@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Padtec Collector v2.2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #fb923c;
+            --bg: #020617;
+            --card-bg: rgba(15, 23, 42, 0.8);
+            --text: #f8fafc;
+        }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b, #020617);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .logo { text-align: center; margin-bottom: 2rem; }
+        .logo h1 { margin: 0; background: linear-gradient(to right, #fb923c, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .form-group { margin-bottom: 1.2rem; }
+        label { display: block; margin-bottom: 0.5rem; color: #94a3b8; font-size: 0.85rem; }
+        input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0.8rem; border-radius: 12px; box-sizing: border-box; }
+        button { width: 100%; background: #f97316; color: white; border: none; padding: 1rem; border-radius: 12px; font-weight: 600; cursor: pointer; margin-top: 1rem; transition: 0.3s; }
+        button:hover { background: #ea580c; transform: translateY(-2px); }
+        #console { margin-top: 1.5rem; background: #000; padding: 1rem; border-radius: 12px; font-family: monospace; font-size: 0.75rem; color: #22c55e; max-height: 120px; overflow-y: auto; border: 1px solid #1e293b; }
+        #result { margin-top: 1.5rem; display: none; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+        .val { font-size: 1.1rem; font-weight: bold; color: #fb923c; }
+        .loading { display: none; text-align: center; margin-top: 1rem; color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">
+            <h1>TM800 Monitor</h1>
+            <div style="color: #fb923c; font-weight: bold; font-size: 0.8rem;">VERSÃO 2.2 - MODO AUTÔNOMO</div>
+        </div>
+
+        <form id="collectForm">
+            <div class="form-group"><label>IP do Equipamento</label><input type="text" id="url" value="10.144.198.10" required></div>
+            <div class="form-group"><label>Usuário</label><input type="text" id="user" required></div>
+            <div class="form-group"><label>Senha</label><input type="password" id="pass" required></div>
+            <button type="submit" id="btnSubmit">Iniciar Coleta</button>
+        </form>
+
+        <div class="loading" id="loader">Aguarde... Coletando dados (pode levar 1-2 min)</div>
+
+        <div id="result">
+            <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 10px;" id="eqName"></div>
+            <div style="display: flex; justify-content: space-between;">
+                <div>LINE 1: <span class="val" id="l1">--</span></div>
+                <div>LINE 2: <span class="val" id="l2">--</span></div>
+            </div>
+        </div>
+
+        <div id="console">
+            <div style="color: grey; margin-bottom: 5px;">> Logs de Sistema</div>
+            <div id="logText"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(m) {
+            const t = document.getElementById('logText');
+            const d = document.createElement('div');
+            d.innerText = `[${new Date().toLocaleTimeString()}] ${m}`;
+            t.appendChild(d);
+            document.getElementById('console').scrollTop = t.scrollHeight;
+        }
+
+        document.getElementById('collectForm').onsubmit = async (e) => {
+            e.preventDefault();
+            document.getElementById('btnSubmit').disabled = true;
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('logText').innerHTML = '';
+
+            log("Solicitando coleta ao servidor...");
+            
+            const data = {
+                url: document.getElementById('url').value,
+                user: document.getElementById('user').value,
+                pass: document.getElementById('pass').value
+            };
+
+            try {
+                const res = await fetch(`/collect?v=2.2&t=${Date.now()}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                const out = await res.json();
+                
+                if (out.status === 'success') {
+                    log("Sucesso!");
+                    document.getElementById('eqName').innerText = out.equipment;
+                    document.getElementById('l1').innerText = `${out.lines['LINE 1'].Pin} / ${out.lines['LINE 1'].Pout}`;
+                    document.getElementById('l2').innerText = `${out.lines['LINE 2'].Pin} / ${out.lines['LINE 2'].Pout}`;
+                    document.getElementById('result').style.display = 'block';
+                } else {
+                    log("ERRO: " + out.message);
+                    alert("Falha na coleta. Verifique os logs no terminal.");
+                }
+            } catch (err) {
+                log("FALHA DE REDE: " + err.message);
+            } finally {
+                document.getElementById('btnSubmit').disabled = false;
+                document.getElementById('loader').style.display = 'none';
+            }
+        };
+        log("Interface v2.2 carregada com sucesso.");
+    </script>
+</body>
+</html>
