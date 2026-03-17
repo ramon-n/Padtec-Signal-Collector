@@ -1,69 +1,47 @@
-# Padtec Signal Collector v3.2
+# Padtec Signal Collector - Optical Auditor v4.4.12
 
-Automação inteligente para coleta de dados de potência (Pin/Pout) em equipamentos Padtec TM800 via interface NMS+.
+Assistente de automação para coleta de sinais em equipamentos Padtec TM800, otimizado para auditoria de trechos ópticos via **NMS Plus Central**.
 
-## 🚀 Funcionalidades
+## 🚀 Novidades da Versão 4.4.12
+- **Auditoria NMS Plus**: Agora é possível auditar NEs que não possuem interface web própria, acessando-os via servidor central.
+- **Bypass de Popups**: O robô remove automaticamente avisos de licença e popups que bloqueiam a interface.
+- **Sistema Super Verbose**: Logs detalhados em tempo real no terminal para monitoramento do robô.
+- **One-Click Start**: Inicialização simplificada via arquivo `.bat`.
 
-- **Interface Web Moderna**: GUI intuitiva construída com Flask e Vuetify/Vanilla CSS.
-- **Motor de Coleta Ultra-Resiliente**: Baseado em Playwright com suporte a:
-  - Fechamento automático de popups de licença/sistema.
-  - Busca rápida de elementos de rede (contornando a lentidão da árvore de equipamentos).
-  - Cliques forçados para máxima compatibilidade em redes industriais.
-- **Exportação de Dados**: Salvamento automático em formato JSON na pasta `data_exports`.
-- **Modo Autônomo**: Suporte a variáveis de ambiente (`.env`) para operação sem intervenção manual.
+## 🛠️ Requisitos
+- Python 3.12+
+- Navegador Google Chrome/Chromium 
+- Acesso à rede de gerência Padtec (VPN ou Local)
 
-## 🛠️ Tecnologias Utilizadas
-
-- **Linguagem**: Python 3.12
-- **Web Framework**: Flask
-- **Automação**: Playwright (Chromium)
-- **Frontend**: HTML5, CSS3 (Glassmorphism), JavaScript (Async/Fetch)
-
-## 📋 Pré-requisitos
-
-1. Python 3.12+ instalado.
-2. Acesso à rede onde se encontra o NMS+ da Padtec.
-
-## ⚙️ Instalação
-
+## 📦 Instalação
 1. Clone o repositório:
    ```bash
-   git clone <URL_DO_REPOSITORIO>
-   cd Padtec
+   git clone https://github.com/ramon-n/Padtec-Signal-Collector.git
    ```
-
 2. Instale as dependências:
-   ```powershell
-   & "C:\Users\ramon\AppData\Local\Programs\Python\Python312\python.exe" -m pip install flask flask-cors playwright python-dotenv
+   ```bash
+   pip install -r requirements.txt
+   playwright install chromium
    ```
 
-3. Instale o navegador do Playwright:
-   ```powershell
-   & "C:\Users\ramon\AppData\Local\Programs\Python\Python312\python.exe" -m playwright install chromium
-   ```
-
-## 🚀 Como Usar (Início Rápido)
-
-1. Vá até a pasta `Padtec`.
-2. Dê dois cliques no arquivo **`iniciar.bat`**.
-3. O servidor subirá e o navegador abrirá automaticamente em `http://localhost:8000`.
-
-*Alternativamente, você pode rodar via terminal:*
-```powershell
-& "C:\Users\ramon\AppData\Local\Programs\Python\Python312\python.exe" start.py
+## ⚙️ Configuração
+Edite o arquivo `.env` na raiz do projeto:
+```env
+TM800_URL=10.144.198.10   # IP do NMS Plus Central
+TM800_USER=seu_usuario
+TM800_PASS=sua_senha
 ```
 
-## 📁 Estrutura do Projeto
+## 🏁 Como Iniciar (Windows)
+1. Dê um duplo clique no arquivo **`iniciar.bat`**.
+2. O navegador abrirá automaticamente em `http://localhost:8000`.
+3. Mantenha a janela preta (terminal) aberta para acompanhar o **Super Verbose**.
 
-- `app.py`: Servidor Flask e rotas da API.
-- `collector.py`: Lógica principal de automação e raspagem.
-- `templates/`: Interface visual (HTML/CSS).
-- `data_exports/`: Histórico de coletas em JSON.
-- `.env`: Configurações de credenciais (Ignorado pelo Git).
+## 📊 Trecho TUDDO (Exemplo de Sucesso)
+A aplicação está pré-configurada para auditar a rota:
+- **CEM-TLP** (10.147.198.201)
+- **JFA** (10.147.113.200)
+- **RJO** (10.147.83.201)
 
-## 🛡️ Segurança
-
-Credenciais sensíveis devem ser mantidas no arquivo `.env`. Nunca submeta o arquivo `.env` para repositórios públicos.
-
----
-**Desenvolvido por Antigravity AI para Padtec Automation.**
+## 📝 Desenvolvido por
+**Equipe de Especialistas (Alex, Neto, Camila, Bia, Leo, Mari)** - Focado em automação de redes ópticas de alta performance.

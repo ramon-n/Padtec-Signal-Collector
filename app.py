@@ -22,11 +22,11 @@ def collect_path():
     data = request.json
     path_name = data.get('path_name', 'TUDDO')
     
-    # Configuração do trecho TUDDO conforme solicitado pelo usuário
+    # Configuração do trecho TUDDO conforme os prints do NMS Plus
     path_config = [
-        {"ip": "10.147.198.201", "name": "CEM-TLP"},
-        {"ip": "10.147.113.200", "name": "JFA"},
-        {"ip": "10.147.83.201", "name": "RJO"}
+        {"id": "CEM-TLP-10.147.198.201-CONECT-TUDDO", "name": "CEM-TLP (TUDDO)"},
+        {"id": "JFA_10.147.113.200-TUDDO", "name": "JFA (TUDDO)"},
+        {"id": "RJO_10.147.83.201-TUDDO-ALT", "name": "RJO (TUDDO)"}
     ]
     
     print(f"\n[{datetime.now()}] >>> Iniciando Auditoria de Trecho: {path_name}")
@@ -40,9 +40,9 @@ def collect_path():
         asyncio.set_event_loop(loop)
         
         for node in path_config:
-            print(f"Auditando Nó: {node['name']} ({node['ip']})...")
-            # Coleta individual para cada nó do trecho
-            res = loop.run_until_complete(collect_signals(node['ip'], user, password))
+            print(f"Auditando No: {node['name']} (ID: {node['id']})...")
+            # Agora collect_signals recebe o identificador para busca na Arvore do NMS
+            res = loop.run_until_complete(collect_signals(node['id'], user, password))
             res['node_name'] = node['name']
             results.append(res)
             
@@ -79,7 +79,7 @@ def collect():
     except Exception as e:
         import traceback
         error_detail = traceback.format_exc()
-        print(f"ERRO CRÍTICO NO BACKEND:\n{error_detail}")
+        print(f"ERRO NO BACKEND:\n{error_detail}")
         return jsonify({"status": "error", "message": str(e), "detail": error_detail})
 
 if __name__ == '__main__':

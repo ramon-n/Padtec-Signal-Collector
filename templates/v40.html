@@ -185,27 +185,42 @@
                 const card = document.createElement('div');
                 card.className = 'node-card';
                 
-                const linesHtml = Object.entries(node.lines).map(([label, params]) => `
-                    <div style="margin-top: 10px;">
-                        <div style="font-size: 0.8rem; font-weight: bold; color: var(--primary); margin-bottom: 5px;">${label}</div>
-                        <div class="param-grid">
-                            <div class="param-item"><div class="param-label">Pin</div><div class="param-value">${params.Pin}</div></div>
-                            <div class="param-item"><div class="param-label">OSNR</div><div class="param-value">${params.OSNR}</div></div>
-                            <div class="param-item"><div class="param-label">Fator Q</div><div class="param-value">${params.Fator_Q || params['Fator Q']}</div></div>
-                            <div class="param-item"><div class="param-label">Modo</div><div class="param-value" style="font-size: 0.7rem;">${params.Modo}</div></div>
+                let contentHtml = '';
+                
+                if (node.status === 'error') {
+                    // Caso o nó individual tenha falhado
+                    card.style.borderLeftColor = '#ef4444';
+                    contentHtml = `
+                        <div style="color: #ef4444; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; font-size: 0.85rem;">
+                            <strong>Falha na Coleta:</strong> ${node.message || 'Sem resposta do equipamento'}
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                } else if (node.lines) {
+                    // Caso de sucesso com dados
+                    contentHtml = Object.entries(node.lines).map(([label, params]) => `
+                        <div style="margin-top: 10px;">
+                            <div style="font-size: 0.8rem; font-weight: bold; color: var(--primary); margin-bottom: 5px;">${label}</div>
+                            <div class="param-grid">
+                                <div class="param-item"><div class="param-label">Pin</div><div class="param-value">${params.Pin}</div></div>
+                                <div class="param-item"><div class="param-label">OSNR</div><div class="param-value">${params.OSNR}</div></div>
+                                <div class="param-item"><div class="param-label">Fator Q</div><div class="param-value">${params.Fator_Q || params['Fator Q'] || 'N/A'}</div></div>
+                                <div class="param-item"><div class="param-label">Modo</div><div class="param-value" style="font-size: 0.73rem;">${params.Modo}</div></div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    contentHtml = '<div style="color: #64748b;">Dados indisponíveis para este nó.</div>';
+                }
 
                 card.innerHTML = `
                     <div class="node-header">
                         <div>
-                            <span class="status-dot status-online"></span>
-                            <span class="node-name">${node.node_name || node.equipment}</span>
+                            <span class="status-dot ${node.status === 'success' ? 'status-online' : 'status-offline'}"></span>
+                            <span class="node-name">${node.node_name || node.equipment || 'Nó Desconhecido'}</span>
                         </div>
-                        <span class="node-ip">${node.timestamp.split('T')[1].split('.')[0]}</span>
+                        <span class="node-ip">${node.timestamp ? node.timestamp.split('T')[1].split('.')[0] : '--:--'}</span>
                     </div>
-                    ${linesHtml}
+                    ${contentHtml}
                 `;
                 view.appendChild(card);
             });
