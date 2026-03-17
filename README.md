@@ -27,7 +27,7 @@ Assistente de automação para coleta de sinais em equipamentos Padtec TM800, ot
 ## ⚙️ Configuração
 Edite o arquivo `.env` na raiz do projeto:
 ```env
-TM800_URL=10.144.198.10   # IP do NMS Plus Central
+TM800_URL=192.168.1.1   # IP do NMS Plus Central
 TM800_USER=seu_usuario
 TM800_PASS=sua_senha
 ```
@@ -39,9 +39,9 @@ TM800_PASS=sua_senha
 
 ## 📊 Trecho TUDDO (Exemplo de Sucesso)
 A aplicação está pré-configurada para auditar a rota:
-- **CEM-TLP** (10.147.198.201)
-- **JFA** (10.147.113.200)
-- **RJO** (10.147.83.201)
+- **CEM-TLP** ()
+- **JFA** ()
+- **RJO** ()
 
 ## 📝 Desenvolvido por
 **Equipe de Especialistas (Alex, Neto, Camila, Bia, Leo, Mari)** - Focado em automação de redes ópticas de alta performance.
