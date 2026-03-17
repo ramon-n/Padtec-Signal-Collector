@@ -44,4 +44,4 @@ A aplicação está pré-configurada para auditar a rota:
 - **RJO** ()
 
 ## 📝 Desenvolvido por
-**Equipe de Especialistas (Alex, Neto, Camila, Bia, Leo, Mari)** - Focado em automação de redes ópticas de alta performance.
+**Equipe de Especialistas (Ramon Nascimento)** - Focado em automação de redes ópticas de alta performance.
