@@ -15,7 +15,41 @@ def add_header(r):
 
 @app.route('/')
 def index():
-    return render_template('v22.html')
+    return render_template('v40.html')
+
+@app.route('/collect_path', methods=['POST'])
+def collect_path():
+    data = request.json
+    path_name = data.get('path_name', 'TUDDO')
+    
+    # Configuração do trecho TUDDO conforme solicitado pelo usuário
+    path_config = [
+        {"ip": "10.147.198.201", "name": "CEM-TLP"},
+        {"ip": "10.147.113.200", "name": "JFA"},
+        {"ip": "10.147.83.201", "name": "RJO"}
+    ]
+    
+    print(f"\n[{datetime.now()}] >>> Iniciando Auditoria de Trecho: {path_name}")
+    
+    results = []
+    user = data.get('user')
+    password = data.get('pass')
+    
+    try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        for node in path_config:
+            print(f"Auditando Nó: {node['name']} ({node['ip']})...")
+            # Coleta individual para cada nó do trecho
+            res = loop.run_until_complete(collect_signals(node['ip'], user, password))
+            res['node_name'] = node['name']
+            results.append(res)
+            
+        loop.close()
+        return jsonify({"status": "success", "path": path_name, "data": results})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
 
 @app.route('/collect', methods=['POST'])
 def collect():

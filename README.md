@@ -42,14 +42,16 @@ Automação inteligente para coleta de dados de potência (Pin/Pout) em equipame
    & "C:\Users\ramon\AppData\Local\Programs\Python\Python312\python.exe" -m playwright install chromium
    ```
 
-## 🚀 Como Usar
+## 🚀 Como Usar (Início Rápido)
 
-1. Inicie o servidor:
-   ```powershell
-   & "C:\Users\ramon\AppData\Local\Programs\Python\Python312\python.exe" app.py
-   ```
-2. Acesse no navegador: `http://localhost:8000`
-3. Preencha os dados (IP, Usuário, Senha) e clique em **Iniciar Coleta**.
+1. Vá até a pasta `Padtec`.
+2. Dê dois cliques no arquivo **`iniciar.bat`**.
+3. O servidor subirá e o navegador abrirá automaticamente em `http://localhost:8000`.
+
+*Alternativamente, você pode rodar via terminal:*
+```powershell
+& "C:\Users\ramon\AppData\Local\Programs\Python\Python312\python.exe" start.py
+```
 
 ## 📁 Estrutura do Projeto
 

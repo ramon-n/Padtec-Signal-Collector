@@ -90,9 +90,7 @@ async def collect_signals(url=None, user=None, passwd=None):
 
             await asyncio.sleep(5)
             await page.wait_for_load_state("networkidle", timeout=30000)
-            print("Extraindo dados...")
-            
-            # ... resto do código de extração (permanece igual)
+            print("Extraindo dados avançados...")
             
             data = {
                 "timestamp": datetime.now().isoformat(),
@@ -102,44 +100,58 @@ async def collect_signals(url=None, user=None, passwd=None):
             }
             
             lines_data = {}
+            # Coletamos para LINE 1 e LINE 2 por padrão, mas o robô buscará os parâmetros específicos
             for line_idx in [1, 2]:
                 line_label = f"LINE {line_idx}"
                 print(f"Coletando {line_label}...")
                 
-                async def get_value_by_label(label):
+                async def get_advanced_value(label):
                     try:
                         return await page.evaluate(f"""(args) => {{
                             try {{
                                 const label = args[0];
-                                const elements = Array.from(document.querySelectorAll('div, span, td, b, p, h4'));
-                                const labelEl = elements.find(e => e.innerText.trim().includes(label));
+                                const elements = Array.from(document.querySelectorAll('div, span, td, b, p, h4, .v-list-item__subtitle'));
+                                // Busca exata ou parcial pelo label
+                                const labelEl = elements.find(e => {{
+                                    const text = e.innerText.trim();
+                                    return text.toLowerCase() === label.toLowerCase() || 
+                                           (text.includes(label) && text.length < label.length + 5);
+                                }});
                                 
                                 if (!labelEl) return 'N/A';
                                 
-                                const context = labelEl.closest('div, section, table, tr, .v-card');
+                                // Tenta achar o valor no contêiner pai mais próximo
+                                const context = labelEl.closest('div, section, table, tr, .v-card, .v-list-item');
                                 if (context) {{
-                                    const regex = new RegExp(label + "[^0-9-]*([-+]?[0-9]*\\\\.?[0-9]+[ ]?dBm)", "i");
-                                    const match = context.innerText.match(regex);
-                                    if (match) return match[1];
+                                    const text = context.innerText;
+                                    // Regex para diferentes formatos (ex: "Pin -5.96 dBm" ou "OSNR 22.90 dB")
+                                    const regex = new RegExp(label + "[^0-9-]*([-+]?[0-9]*\\\\.?[0-9]+[ ]?(dBm|dB|dBQ|nm)?)", "i");
+                                    const match = text.match(regex);
+                                    if (match) return match[1].trim();
+                                    
+                                    // Fallback: se houver um elemento irmão com o valor
+                                    if (labelEl.nextElementSibling) return labelEl.nextElementSibling.innerText.trim();
                                 }}
-                                return labelEl.nextElementSibling ? labelEl.nextElementSibling.innerText.trim() : 'N/A';
+                                return 'N/A';
                             }} catch (e) {{ return 'ERR'; }}
                         }}""", [label])
                     except: return "ERR"
 
                 lines_data[line_label] = {
-                    "Pin": await get_value_by_label("Pin"),
-                    "Pout": await get_value_by_label("Pout")
+                    "Pin": await get_advanced_value("Pin"),
+                    "Pout": await get_advanced_value("Pout"),
+                    "OSNR": await get_advanced_value("OSNR"),
+                    "Fator Q": await get_advanced_value("Fator Q"),
+                    "Modo": await get_advanced_value("Modo")
                 }
 
             data["lines"] = lines_data
             
-            # Garantir pasta de exportação
+            # Exportação
             if not os.path.exists("data_exports"): os.makedirs("data_exports")
-            output_file = os.path.join("data_exports", f"signal_{datetime.now().strftime('%H%M%S')}.json")
+            output_file = os.path.join("data_exports", f"audit_{datetime.now().strftime('%H%M%S')}.json")
             with open(output_file, "w") as f: json.dump(data, f, indent=4)
             
-            print(f"Dados salvos com sucesso em {output_file}")
             return data
 
         except Exception as e:
